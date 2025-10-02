@@ -1,3 +1,13 @@
+window.addEventListener("load", async () => {
+  try {
+    await senza.init();
+    senza.lifecycle.configure({autoBackground: false});
+    senza.uiReady();
+  } catch (error) {
+    console.error(error);
+  }
+});
+
 function generateCode(text, size) {
   let data = encodeURIComponent(text);
   let src = `http://api.qrserver.com/v1/create-qr-code/?data=${data}&size=${size}x${size}`;
