@@ -1,13 +1,13 @@
 const express = require("express");
+require('dotenv').config();
 const app = express();
 const errorHandler = require('errorhandler');
 const hostname = process.env.HOSTNAME || 'localhost';
 const port = parseInt(process.env.PORT, 10) || 8080;
 const publicDir = process.argv[2] || __dirname + '/public';
 const io = require('socket.io').listen(app.listen(port));
-const config = require("./config.json");
 const { OpenAI } = require("openai");
-const openai = new OpenAI({apiKey: config.OpenAIApiKey});
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 app.use(express.static(publicDir));
 app.use(errorHandler({ dumpExceptions: true, showStack: true}));
@@ -37,24 +37,24 @@ async function test() {
 }
 
 io.sockets.on('initialload', function (socket) {  
-	socket.emit('update', state);
+    socket.emit('update', state);
 });
 
 io.sockets.on('connection', (socket) => {
   socket.on('hello', (message) => {  
-  	io.sockets.emit('update', state);
+      io.sockets.emit('update', state);
   });
 
   socket.on('interim', (message) => {
     state.interim = message.interim;
-  	io.sockets.emit('update', state);
+      io.sockets.emit('update', state);
   });
 
   socket.on('final', async (message) => {
     console.log(message.final);
     state.final = message.final;
     state.interim = "";
-  	state.src = "";
+      state.src = "";
     io.sockets.emit('update', state);
 
     state.src = testMode ? await test() : await generate(message.final);
